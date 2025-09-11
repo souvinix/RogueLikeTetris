@@ -19,7 +19,7 @@ public class ClassicalLogic {
     //
     //What elements does both modes share? :
     //Falling Blocks, Rotating blocks, fast bottom hit, Score, Level, Lines, GameOver after specific condiftion, Pause, Restart, Save, Load, Playfield (10x18)
-    private static final String TAG = "MainGameLogic";
+    private static final String TAG = "ClassicalLogic";
 
     private static final float MOVING_SPEED = 0.06f; //Every ... seconds
     protected Playfield playfield;
@@ -52,17 +52,18 @@ public class ClassicalLogic {
         ATTRIBUTES_MAP.put(Tetramino.Shape.I_SHAPED, new ShapeAttributes(new Texture("orange_tile.png"), 2));
     }
     public ClassicalLogic(){
-        playfield = new Playfield(new Texture("playfield_01.png")); //outer: a689d7
-        outerPlayfieldColor = Color.valueOf("a689d7");
 
-        frozenTiles = new Tetramino_Tile[10][18];
-
-        controller = new Controller();
-        Gdx.input.setInputProcessor(controller);
     }
 
     public void show(){
         spawnRandomTetramino();
+        frozenTiles = new Tetramino_Tile[10][18];
+
+        playfield = new Playfield(new Texture("playfield_01.png")); //outer: a689d7
+        outerPlayfieldColor = Color.valueOf("a689d7");
+
+        controller = new Controller();
+        Gdx.input.setInputProcessor(controller);
     }
 
     public void render(float dt) { //requires batch.begin and batch.end
@@ -75,6 +76,98 @@ public class ClassicalLogic {
         if(tickCounter >= ClassicalLevelAttributes.LEVEL_SPEEDS[currentLevel]){
             tick();
         }
+
+        drawFrozenTiles();
+    }
+
+    private void drawFrozenTiles(){
+        for(int i = 0; i < frozenTiles.length; i++){
+            for(int j = 0; j < frozenTiles[i].length; j++){
+                if(frozenTiles[i][j] != null){
+                    frozenTiles[i][j].draw(playfield);
+                }
+            }
+        }
+    }
+    public enum Direction{
+        LEFT,
+        RIGHT,
+        DOWN,
+        ROTATING;
+    }
+    private boolean isCollidingWithTiles(Direction direction){
+        if(currentTetramino == null){ return false; }
+
+        if(direction == Direction.ROTATING){
+            Tetramino_Tile[][] tempTetramino = currentTetramino.getNextRotationState();
+            for(int i = 0; i < tempTetramino.length; i++){
+                for(int j = 0; j < tempTetramino[i].length; j++){
+                    if(tempTetramino[i][j] != null && tempTetramino[i][j].getY() < Playfield.HEIGHT_TILES){
+                        if(frozenTiles[tempTetramino[i][j].getX()][tempTetramino[i][j].getY()] != null){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < currentTetramino.getTiles().length; i++){
+            for(int j = 0; j < currentTetramino.getTiles()[i].length; j++){
+                Tetramino_Tile tetraminoTile = currentTetramino.getTiles()[i][j];
+                if(tetraminoTile != null){
+                    if(tetraminoTile.getY() >= Playfield.HEIGHT_TILES){ break; }
+                    if(direction == Direction.LEFT){
+                        if(tetraminoTile.getX() - 1 >= 0 && frozenTiles[tetraminoTile.getX() - 1][tetraminoTile.getY()] != null){
+                            return true;
+                        }
+                    }else if(direction == Direction.RIGHT){
+                        if(tetraminoTile.getX() + 1 < Playfield.WIDTH_TILES - 1 && frozenTiles[tetraminoTile.getX() + 1][tetraminoTile.getY()] != null){
+                            return true;
+                        }
+                    }else if(direction == Direction.DOWN){
+                        if(tetraminoTile.getY() - 1 >= 0 && frozenTiles[tetraminoTile.getX()][tetraminoTile.getY() - 1] != null){
+                            return true;
+                        }
+                    }
+
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isColliding(Direction direction){
+        if(currentTetramino == null){ return false; }
+
+        if(direction == Direction.LEFT){
+            if(currentTetramino.getMostLeftTile().getX() - 1 < 0 || isCollidingWithTiles(direction)){ //Left Border
+                return true;
+            }
+        }
+        else if(direction == Direction.RIGHT){
+            if(currentTetramino.getMostRightTile().getX() + 1 > Playfield.WIDTH_TILES - 1 || isCollidingWithTiles(direction)){ //Right Border
+                return true;
+            }
+        }
+        else if(direction == Direction.DOWN){
+            if(currentTetramino.getMostBottomTile().getY() - 1 < 0 || isCollidingWithTiles(direction)) { //Bottom Border){
+                return true;
+            }
+        }else if(direction == Direction.ROTATING){
+            Tetramino_Tile[][] tempTetramino = currentTetramino.getNextRotationState();
+            for(int i = 0; i < tempTetramino.length; i++){
+                for(int j = 0; j < tempTetramino[i].length; j++){
+                    if(tempTetramino[i][j] != null){
+                        if(tempTetramino[i][j].getX() < 0 || tempTetramino[i][j].getX() > Playfield.WIDTH_TILES - 1 || tempTetramino[i][j].getY() < 0){
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if(isCollidingWithTiles(direction)){ return true; }
+        }
+        return false;
     }
 
     public void checkCollision(float dt){
@@ -86,29 +179,17 @@ public class ClassicalLogic {
 
         if(collisionCounter >= MOVING_SPEED){
             collisionCounter = 0;
-            if(controller.isMovingLeft()){
-                if(currentTetramino.getMostLeftTile().getX() - 1 > 0){ //Left Border
-                    currentTetramino.moveLeft();
-                }else{
-                    Gdx.app.debug(TAG, "Left border hit");
-                }
+            if(controller.isMovingLeft() && !isColliding(Direction.LEFT)){
+                currentTetramino.moveLeft();
             }
-            if(controller.isMovingRight()){
-                if(currentTetramino.getMostRightTile().getX() + 1 < Playfield.WIDTH_TILES - 1){ //Right Border
-                    currentTetramino.moveRight();
-                }else{
-                    Gdx.app.debug(TAG, "Right border hit");
-                }
+            if(controller.isMovingRight() && !isColliding(Direction.RIGHT)){
+                currentTetramino.moveRight();
             }
-            if(controller.isMovingDown()){
-                if(currentTetramino.getMostBottomTile().getY() - 1 > 0) { //Bottom Border
-                    currentTetramino.moveDown();
-                }else{
-                    Gdx.app.debug(TAG, "Bottom border has been hit");
-                }
+            if(controller.isMovingDown() && !isColliding(Direction.DOWN)){
+                currentTetramino.moveDown();
             }
         }
-        if(controller.isRotationTriggered()){
+        if(controller.isRotationTriggered() && !isColliding(Direction.ROTATING)){
             currentTetramino.rotate();
             controller.resetRotationTriggered();
         }
@@ -118,12 +199,19 @@ public class ClassicalLogic {
     }
     public void tick(){ //currentTile is going 1 down
         if(currentTetramino != null){
-            currentTetramino.moveDown();
+            if(!isColliding(Direction.DOWN)){
+                currentTetramino.moveDown();
+            }else{
+                freezeCurrentTile();
+                spawnRandomTetramino();
+            }
         }
         tickCounter = 0;
     }
 
     public void freezeCurrentTile(){
+        if(currentTetramino == null){ return; }
+
         for(int i = 0; i < currentTetramino.getTiles().length; i++){
             for(int j = 0; j < currentTetramino.getTiles()[i].length; j++){
                 if(currentTetramino.getTiles()[i][j] != null) {
@@ -168,6 +256,7 @@ public class ClassicalLogic {
         gameOver = false;
 
         currentLevel = 0;
+
 
         increaseLevel();
         clearFrozenTiles();

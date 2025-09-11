@@ -114,6 +114,14 @@ public class Tetramino {
         }
     }
 
+    public Tetramino_Tile[][] getNextRotationState(){
+        if(currentRotation < rotationType - 1){
+            return rotationStates[currentRotation + 1];
+        }else{
+            return rotationStates[0];
+        }
+    }
+
     private void setTiles(Tetramino_Tile[]... tiles){
         if(tiles.length == 4){
             this.tiles = tiles;
@@ -123,6 +131,7 @@ public class Tetramino {
     }
 
     public void draw(Playfield playfield){
+        //Drawing current tile in its current rotation state
         for(int i = 0; i < rotationStates[currentRotation].length; i++){
             for(int j = 0; j < rotationStates[currentRotation][i].length; j++){
                 if(rotationStates[currentRotation][i][j] != null){
@@ -149,25 +158,31 @@ public class Tetramino {
     }
 
     public Tetramino_Tile getMostRightTile(){
+        Tetramino_Tile tile = null;
         for(int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
-                if (tiles[3 - i][j] != null) {
-                    return tiles[3 - i][j];
+                if(tiles[i][j] != null){
+                    if(tile == null || tiles[i][j].getX() > tile.getX()){
+                        tile = tiles[i][j];
+                    }
                 }
             }
         }
-        return null;
+        return tile;
     }
 
     public Tetramino_Tile getMostBottomTile(){
+        Tetramino_Tile tile = null;
         for(int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
-                if (tiles[i][3 - j] != null) {
-                    return tiles[i][3 - j];
+                if(tiles[i][j] != null){
+                    if(tile == null || tiles[i][j].getY() < tile.getY()){
+                        tile = tiles[i][j];
+                    }
                 }
             }
         }
-        return null;
+        return tile;
     }
 
     public void setX(int x){ this.x = x; }
