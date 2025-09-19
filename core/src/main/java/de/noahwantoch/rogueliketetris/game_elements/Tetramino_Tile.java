@@ -11,9 +11,6 @@ public class Tetramino_Tile {
     private int x; //relative to playfield, tile-coord: 0, 1, 2, 3, 4, ...
     private int y; //relative to playfield, tile-coord: 0, 1, 2, 3, 4, ...
 
-    private int localX;
-    private int localY;
-
     public Tetramino_Tile(Texture texture){
         this.texture = texture;
     }
@@ -28,21 +25,4 @@ public class Tetramino_Tile {
 
     public int getX(){ return x; }
     public int getY(){ return y; }
-
-    //local = position in Tetramino (not in playfield)
-    public int getLocalX(){
-        return localX;
-    }
-    public int getLocalY(){
-        return localY;
-    }
-
-    public void setLocalX(int x){
-        localX = x;
-    }
-    public void setLocalY(int y){
-        localY = y;
-    }
-
-
 }

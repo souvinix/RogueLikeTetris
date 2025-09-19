@@ -20,7 +20,6 @@ public class Tetramino {
     private Tetramino_Tile[][] tiles;
     private int rotationType;
     private int currentRotation = 0;
-    private int tileSize;
 
     //position of the down-left tile, default is 0,0
     private int x = 0; //tile coord: 0, 1, 2, 3, ...
@@ -133,33 +132,19 @@ public class Tetramino {
                 }
             }
         }
-
-        setLocalPositions();
     }
-
-
-    private void setLocalPositions() {
-        for (int x = 0; x < rotationType; x++) {
-            for (int i = 0; i < rotationStates[currentRotation][x].length; i++) {
-                for (int j = 0; j < rotationStates[currentRotation].length; j++) {
-                    if(rotationStates[x][i][j] == null){ continue; }
-
-                    rotationStates[x][i][j].setLocalX(i);
-                    rotationStates[x][i][j].setLocalY(3 - j);
-                }
-            }
-        }
-    }
-
 
     public String tetraminoToString() {
+        return tetraminoToString(currentRotation);
+    }
+    public String tetraminoToString(int tetraminoToString) {
         Formatter formatter = new Formatter();
 
-        formatter.format("X: %s, Y: %s, Rotation-state: %d\n", x, y, currentRotation);
+        formatter.format("X: %s, Y: %s, Rotation-state: %d\n", x, y, tetraminoToString);
         formatter.format("Rotations states for %s: {\n", shape.toString()); // Startklammer für die Zeile
-        for (int i = 0; i < rotationStates[currentRotation][0].length; i++) {
-            for(int j = 0; j < rotationStates[currentRotation].length; j++){
-                if(rotationStates[currentRotation][i][j] != null){
+        for (int i = 0; i < rotationStates[tetraminoToString][0].length; i++) {
+            for(int j = 0; j < rotationStates[tetraminoToString].length; j++){
+                if(rotationStates[tetraminoToString][i][j] != null){
                     formatter.format("X ");
                 }else {
                     formatter.format("- ");
@@ -193,10 +178,6 @@ public class Tetramino {
         for(int i = 0; i < rotationStates[currentRotation].length; i++){
             for(int j = 0; j < rotationStates[currentRotation][i].length; j++){
                 if(rotationStates[currentRotation][i][j] != null){
-                    //works fine
-//                    rotationStates[currentRotation][i][j].setX(x + j);
-//                    rotationStates[currentRotation][i][j].setY(y + (3 - i));
-
                     rotationStates[currentRotation][i][j].setX(x + j);
                     rotationStates[currentRotation][i][j].setY(y + (3 - i));
                     rotationStates[currentRotation][i][j].draw(playfield);
