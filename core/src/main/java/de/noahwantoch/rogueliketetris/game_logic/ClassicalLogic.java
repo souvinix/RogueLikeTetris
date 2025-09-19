@@ -22,7 +22,9 @@ public class ClassicalLogic {
     //Falling Blocks, Rotating blocks, fast bottom hit, Score, Level, Lines, GameOver after specific condiftion, Pause, Restart, Save, Load, Playfield (10x18)
     private static final String TAG = "ClassicalLogic";
 
-    private static final float MOVING_SPEED = 0.06f; //Every ... seconds
+    private static final float MOVING_SPEED_VERTICAL = 0.04f; //Every ... seconds
+    private static final float MOVING_SPEED_HORIZONTAL = 0.05f; //Every ... seconds
+    private static final float MOVING_SPEED_HORIZONTAL_DELAY = 0.25f; //time to pass after left/right is pressed to being "held"
     protected Playfield playfield;
     protected Color outerPlayfieldColor;
     protected Tetramino currentTetramino; //current falling tetramino (movable)
@@ -37,7 +39,9 @@ public class ClassicalLogic {
     protected boolean started = false;
 
     private float tickCounter = 0;
-    private float collisionCounter = 0;
+    private float speedCounter_vertical = 0;
+    private float speedCounter_horizontal = 0;
+    private float delayCounter_horizontal = 0;
 
 
     protected Controller controller;
@@ -52,9 +56,7 @@ public class ClassicalLogic {
         ATTRIBUTES_MAP.put(Tetramino.Shape.Z_SHAPED, new ShapeAttributes(new Texture("green_tile.png"), 2));
         ATTRIBUTES_MAP.put(Tetramino.Shape.I_SHAPED, new ShapeAttributes(new Texture("orange_tile.png"), 2));
     }
-    public ClassicalLogic(){
-
-    }
+    public ClassicalLogic(){}
 
     public void show(){
         frozenTiles = new Tetramino_Tile[10][18];
@@ -169,37 +171,62 @@ public class ClassicalLogic {
             return;
         }
 
-        collisionCounter += dt;
+        speedCounter_vertical += dt;
+        speedCounter_horizontal += dt;
 
-        if(collisionCounter >= MOVING_SPEED){
-            collisionCounter = 0;
+        Vector2 finalMovement;
+        int vertical = 0; //no input yet
+        int horizontal = 0; //no input yet
 
-            int horizontal = 0; //no input yet
-            int vertical = 0; //no input yet
+        if(speedCounter_vertical >= MOVING_SPEED_VERTICAL){
+            speedCounter_vertical = 0;
 
-            Vector2 finalMovement = new Vector2(0, 0);
-
-            if(controller.isMovingLeft()){
-                horizontal--;
-            }
-            if(controller.isMovingRight()){
-                horizontal++;
-            }
             if(controller.isMovingDown()){
                 vertical--;
             }
+        }
 
-            finalMovement = isColliding(horizontal, vertical);
+        if(controller.isMovingLeftTriggered()){
+            horizontal--;
+            delayCounter_horizontal = 0;
+        }
+        if(controller.isMovingRightTriggered()){
+            horizontal++;
+            delayCounter_horizontal = 0;
+        }
 
-            if(finalMovement.x == -1){
-                currentTetramino.moveLeft();
-            }else if(finalMovement.x == 1){
-                currentTetramino.moveRight();
+        if((controller.isMovingLeftHeld() || controller.isMovingRightHeld()) &&
+            (!controller.isMovingLeftTriggered() || !controller.isMovingRightTriggered())){
+            delayCounter_horizontal += dt;
+        }
+
+
+        if(speedCounter_horizontal >= MOVING_SPEED_HORIZONTAL &&
+            delayCounter_horizontal >= MOVING_SPEED_HORIZONTAL_DELAY){
+
+            speedCounter_horizontal = 0;
+
+            if(controller.isMovingLeftHeld()){
+                horizontal--;
             }
-
-            if(finalMovement.y == -1){
-                currentTetramino.moveDown();
+            if(controller.isMovingRightHeld()){
+                horizontal++;
             }
+        }
+
+        controller.resetLeftTriggered();
+        controller.resetRightTriggered();
+
+        finalMovement = isColliding(horizontal, vertical);
+
+        if(finalMovement.x == -1){
+            currentTetramino.moveLeft();
+        }else if(finalMovement.x == 1){
+            currentTetramino.moveRight();
+        }
+
+        if(finalMovement.y == -1){
+            currentTetramino.moveDown();
         }
 
         if(controller.isRotationTriggered() && !isRotationColliding()){

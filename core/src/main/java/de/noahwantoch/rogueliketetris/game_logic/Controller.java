@@ -9,8 +9,10 @@ public class Controller implements InputProcessor {
     private boolean rotateTriggered;
     private boolean rotateHeld;
     private boolean isMovingDown;
-    private boolean isMovingLeft;
-    private boolean isMovingRight;
+    private boolean isMovingLeftHeld;
+    private boolean isMovingLeftTriggered;
+    private boolean isMovingRightHeld;
+    private boolean isMovingRightTriggered;
 
     private boolean hardDrop;
 
@@ -23,11 +25,13 @@ public class Controller implements InputProcessor {
         if(keycode == Input.Keys.DOWN){
             isMovingDown = true;
         }
-        if(keycode == Input.Keys.LEFT){
-            isMovingLeft = true;
+        if(keycode == Input.Keys.LEFT && !isMovingLeftHeld){
+            isMovingLeftTriggered = true;
+            isMovingLeftHeld = true;
         }
-        if(keycode == Input.Keys.RIGHT){
-            isMovingRight = true;
+        if(keycode == Input.Keys.RIGHT && !isMovingRightHeld){
+            isMovingRightTriggered = true;
+            isMovingRightHeld = true;
         }
         if(keycode == Input.Keys.SPACE){
             hardDrop = true;
@@ -45,10 +49,10 @@ public class Controller implements InputProcessor {
             isMovingDown = false;
         }
         if(keycode == Input.Keys.LEFT){
-            isMovingLeft = false;
+            isMovingLeftHeld = false;
         }
         if(keycode == Input.Keys.RIGHT){
-            isMovingRight = false;
+            isMovingRightHeld = false;
         }
         if(keycode == Input.Keys.SPACE){
             hardDrop = false;
@@ -63,14 +67,25 @@ public class Controller implements InputProcessor {
     public void resetRotationTriggered(){
         rotateTriggered = false;
     }
+    public void resetLeftTriggered(){
+        isMovingLeftTriggered = false;
+    }
+    public void resetRightTriggered() {
+        isMovingRightTriggered = false;
+    }
+
+
+    public boolean isMovingLeftTriggered(){ return isMovingLeftTriggered; }
+    public boolean isMovingRightTriggered(){ return isMovingRightTriggered; }
+
     public boolean isMovingDown(){
         return isMovingDown;
     }
-    public boolean isMovingLeft(){
-        return isMovingLeft;
+    public boolean isMovingLeftHeld(){
+        return isMovingLeftHeld;
     }
-    public boolean isMovingRight(){
-        return isMovingRight;
+    public boolean isMovingRightHeld(){
+        return isMovingRightHeld;
     }
     public boolean hardDrop(){
         return hardDrop;
