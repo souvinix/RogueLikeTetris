@@ -14,7 +14,8 @@ public class Controller implements InputProcessor {
     private boolean isMovingRightHeld;
     private boolean isMovingRightTriggered;
 
-    private boolean hardDrop;
+    private boolean hardDropTriggered;
+    private boolean hardDropHeld;
 
     @Override
     public boolean keyDown(int keycode) {
@@ -34,7 +35,8 @@ public class Controller implements InputProcessor {
             isMovingRightHeld = true;
         }
         if(keycode == Input.Keys.SPACE){
-            hardDrop = true;
+            hardDropTriggered = true;
+            hardDropHeld = true;
         }
 
         return true;
@@ -55,7 +57,7 @@ public class Controller implements InputProcessor {
             isMovingRightHeld = false;
         }
         if(keycode == Input.Keys.SPACE){
-            hardDrop = false;
+            hardDropHeld = false;
         }
         return true;
     }
@@ -63,7 +65,6 @@ public class Controller implements InputProcessor {
     public boolean isRotationTriggered(){
         return rotateTriggered;
     }
-
     public void resetRotationTriggered(){
         rotateTriggered = false;
     }
@@ -87,8 +88,11 @@ public class Controller implements InputProcessor {
     public boolean isMovingRightHeld(){
         return isMovingRightHeld;
     }
-    public boolean hardDrop(){
-        return hardDrop;
+    public boolean isHardDropTriggered(){
+        return hardDropTriggered;
+    }
+    public void resetHardDropTriggered(){
+        hardDropTriggered = false;
     }
 
 

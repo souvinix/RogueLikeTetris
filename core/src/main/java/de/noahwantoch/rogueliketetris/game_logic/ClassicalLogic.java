@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Formatter;
 import java.util.Map;
 
 import de.noahwantoch.rogueliketetris.game_elements.ClassicalLevelAttributes;
@@ -200,7 +202,6 @@ public class ClassicalLogic {
             delayCounter_horizontal += dt;
         }
 
-
         if(speedCounter_horizontal >= MOVING_SPEED_HORIZONTAL &&
             delayCounter_horizontal >= MOVING_SPEED_HORIZONTAL_DELAY){
 
@@ -233,10 +234,18 @@ public class ClassicalLogic {
             currentTetramino.rotate();
             controller.resetRotationTriggered();
         }
-        if(controller.hardDrop()){
-            Gdx.app.debug(TAG, "Hard drop");
+        if(controller.isHardDropTriggered()){
+            hardDrop();
+            controller.resetHardDropTriggered();
         }
     }
+
+    private void hardDrop(){
+        while(isColliding(0, -1).y == -1){
+            currentTetramino.moveDown();
+        }
+    }
+
     public void tick(){ //currentTile is going 1 down
         Vector2 finalMovement = isColliding(0, -1);
 
@@ -245,10 +254,59 @@ public class ClassicalLogic {
                 currentTetramino.moveDown();
             }else{
                 freezeCurrentTile();
+                checkTetris();
                 spawnRandomTetramino();
             }
         }
         tickCounter = 0;
+    }
+
+    private void printFrozenTilesLines(){
+        Formatter formatter = new Formatter();
+        formatter.format("\n");
+        for(int i = 0; i < frozenTiles.length; i++){
+            int counter = 0;
+            for(int j = 0; j < frozenTiles[i].length; j++){
+                if(frozenTiles[i][j] != null){
+                    counter++;
+                }
+            }
+            formatter.format("i = %d: %d lines\n", i, counter);
+        }
+
+        Gdx.app.debug(TAG, formatter.toString());
+    }
+
+    private void checkTetris(){ //checking for full lines (10 blocks in the same row) and deletes them
+        ArrayList<Integer> rowIndicies = new ArrayList<Integer>(frozenTiles.length);
+        for(int i = 0; i < frozenTiles.length; i++){
+            int counter = 0;
+            for(int j = 0; j < frozenTiles[i].length; j++){
+                if(frozenTiles[i][j] != null){
+                    counter++;
+                }
+            }
+
+            if(counter == 10){ //full line
+                rowIndicies.add(i); //add the full row to the list
+                Gdx.app.debug(TAG, "Row " + i + " is full");
+            }
+        }
+
+        printFrozenTilesLines();
+
+        for(int i : rowIndicies){ //deletes full lines and fills it up with nulls
+            frozenTiles[i] = new Tetramino_Tile[10];
+        }
+
+        int rowsDeleted = 0;
+        for(int i : rowIndicies){
+            for(int j = i + 1; j < frozenTiles.length - 1; j++){
+                frozenTiles[j - 1 - rowsDeleted] = frozenTiles[j - rowsDeleted];
+            }
+            frozenTiles[frozenTiles.length - 1 - rowsDeleted] = new Tetramino_Tile[10];
+            rowsDeleted++;
+        }
     }
 
     public void freezeCurrentTile(){

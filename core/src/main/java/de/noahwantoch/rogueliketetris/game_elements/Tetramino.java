@@ -16,7 +16,6 @@ public class Tetramino {
         I_SHAPED,
         O_SHAPED
     }
-
     private Tetramino_Tile[][] tiles;
     private int rotationType;
     private int currentRotation = 0;
@@ -27,8 +26,6 @@ public class Tetramino {
 
     private Shape shape;
     private Tetramino_Tile[][][] rotationStates;
-
-
     public Tetramino(Texture texture, Shape shape, int rotationType) {
         tiles = new Tetramino_Tile[4][4];
         this.rotationType = rotationType;
@@ -104,17 +101,6 @@ public class Tetramino {
     private void generateRotationStates(){
         rotationStates[0] = tiles; //start-state and first element in rotation-states
 
-        //works fine too
-//        for(int x = 1; x < rotationType; x++){ //starts at 1, bc one element already in list
-//            Tetramino_Tile[][] newTiles = new Tetramino_Tile[4][4];
-//            rotationStates[x] = newTiles;
-//            for(int i = 0; i < rotationStates[x - 1][0].length; i++){
-//                for(int j = 1; j < rotationStates[x - 1].length; j++){
-//                    rotationStates[x][i][j - 1] = rotationStates[x - 1][3 - j][i];
-//                }
-//            }
-//        }
-
         for(int x = 1; x < rotationType; x++){ //starts at 1, bc one element already in list
             Tetramino_Tile[][] newTiles = new Tetramino_Tile[4][4];
             rotationStates[x] = newTiles;
@@ -156,15 +142,13 @@ public class Tetramino {
 
         return formatter.toString();
     }
-
     public Tetramino_Tile[][] getNextRotationState(){
         if(currentRotation < rotationType - 1){
             return rotationStates[currentRotation + 1];
         }else{
             return rotationStates[0];
         }
-    }
-
+    } //For debugging
     private void setTiles(Tetramino_Tile[]... tiles){
         if(tiles.length == 4){
             this.tiles = tiles;
@@ -178,9 +162,8 @@ public class Tetramino {
         for(int i = 0; i < rotationStates[currentRotation].length; i++){
             for(int j = 0; j < rotationStates[currentRotation][i].length; j++){
                 if(rotationStates[currentRotation][i][j] != null){
-                    rotationStates[currentRotation][i][j].setX(x + j);
-                    rotationStates[currentRotation][i][j].setY(y + (3 - i));
                     rotationStates[currentRotation][i][j].draw(playfield);
+                    updateTiles();
                 }
             }
         }
@@ -199,7 +182,6 @@ public class Tetramino {
         }
         return tile;
     }
-
     public Tetramino_Tile getMostRightTile(){
         Tetramino_Tile tile = null;
         for(int i = 0; i < tiles.length; i++) {
@@ -213,7 +195,6 @@ public class Tetramino {
         }
         return tile;
     }
-
     public Tetramino_Tile getMostBottomTile(){
         Tetramino_Tile tile = null;
         for(int i = 0; i < tiles.length; i++) {
@@ -228,8 +209,14 @@ public class Tetramino {
         return tile;
     }
 
-    public void setX(int x){ this.x = x; }
-    public void setY(int y){ this.y = y; }
+    public void setX(int x){
+        this.x = x;
+        updateTiles();
+    }
+    public void setY(int y){
+        this.y = y;
+        updateTiles();
+    }
     public int getX(){ return x; }
     public int getY(){ return y; }
 
@@ -249,5 +236,16 @@ public class Tetramino {
 
     public void moveDown(){
         setY(y - 1);
+    }
+
+    private void updateTiles(){
+        for(int i = 0; i < rotationStates[currentRotation].length; i++){
+            for(int j = 0; j < rotationStates[currentRotation][i].length; j++){
+                if(rotationStates[currentRotation][i][j] != null){
+                    rotationStates[currentRotation][i][j].setX(x + j);
+                    rotationStates[currentRotation][i][j].setY(y + (3 - i));
+                }
+            }
+        }
     }
 }
