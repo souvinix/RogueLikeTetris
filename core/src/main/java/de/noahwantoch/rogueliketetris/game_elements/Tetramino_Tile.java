@@ -18,6 +18,11 @@ public class Tetramino_Tile {
         GameHandler.batch.draw(texture, playfield.getX() + x * Playfield.TILE_SIZE_PX, playfield.getY() + y * Playfield.TILE_SIZE_PX, Playfield.TILE_SIZE_PX, Playfield.TILE_SIZE_PX);
     }
 
+    public void setPosition(int x, int y){
+        setX(x);
+        setY(y);
+    }
+
     public void setX(int x){ this.x = x; }
 
     public void setY(int y){ this.y = y; }

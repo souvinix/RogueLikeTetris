@@ -10,7 +10,7 @@ import de.noahwantoch.rogueliketetris.screen_handling.ScreenIdentifier;
 import de.noahwantoch.rogueliketetris.screens.MenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class GameHandler extends Game {
+public class GameHandler extends Game{
     private static final String TAG = "Main";
     public static SpriteBatch batch;
     public ScreenHandler screenHandler;

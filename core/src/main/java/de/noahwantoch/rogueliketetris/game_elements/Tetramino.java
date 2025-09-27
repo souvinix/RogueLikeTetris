@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 
 import java.util.Formatter;
 
+import de.noahwantoch.rogueliketetris.main.GameHandler;
+
 public class Tetramino {
 
     public enum Shape {
